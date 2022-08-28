@@ -1,0 +1,79 @@
+{
+  "_note1": "KEEP THIS FILE! Check it into a version control system (VCS) like git.",
+  "_note2": "ObjectBox manages crucial IDs for your object model. See docs for details.",
+  "_note3": "If you have VCS merge conflicts, you must resolve them according to ObjectBox docs.",
+  "entities": [
+    {
+      "id": "1:989458524031537533",
+      "lastPropertyId": "2:3474168428227996539",
+      "name": "MachineOperator",
+      "properties": [
+        {
+          "id": "1:8819696190184956003",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:3474168428227996539",
+          "name": "name",
+          "type": 9
+        }
+      ],
+      "relations": []
+    },
+    {
+      "id": "2:6910025851931880282",
+      "lastPropertyId": "6:7685091664872919104",
+      "name": "Recipe",
+      "properties": [
+        {
+          "id": "1:6944206246029968754",
+          "name": "id",
+          "type": 6,
+          "flags": 1
+        },
+        {
+          "id": "2:4517506848976828897",
+          "name": "name",
+          "type": 9
+        },
+        {
+          "id": "3:2119976467580269454",
+          "name": "temperature",
+          "type": 8
+        },
+        {
+          "id": "4:1393217981674910358",
+          "name": "speed",
+          "type": 8
+        },
+        {
+          "id": "5:6329694762665024362",
+          "name": "count",
+          "type": 6
+        },
+        {
+          "id": "6:7685091664872919104",
+          "name": "machineOperatorId",
+          "type": 11,
+          "flags": 520,
+          "indexId": "1:2539373151985007644",
+          "relationTarget": "MachineOperator"
+        }
+      ],
+      "relations": []
+    }
+  ],
+  "lastEntityId": "2:6910025851931880282",
+  "lastIndexId": "1:2539373151985007644",
+  "lastRelationId": "0:0",
+  "lastSequenceId": "0:0",
+  "modelVersion": 5,
+  "modelVersionParserMinimum": 5,
+  "retiredEntityUids": [],
+  "retiredIndexUids": [],
+  "retiredPropertyUids": [],
+  "retiredRelationUids": [],
+  "version": 1
+}
