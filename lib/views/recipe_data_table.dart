@@ -1,17 +1,16 @@
 import 'package:flutter/material.dart';
-import 'package:objectbox/objectbox.dart';
 import 'package:recipe_management/entities.dart';
 
 class RecipeDataTable extends StatefulWidget {
   final List<Recipe> recipes;
   final void Function(int columnIndex, bool ascending) onSort;
-  final Store store;
+  final void Function(int id) onDelete;
 
   const RecipeDataTable({
     Key? key,
     required this.recipes,
     required this.onSort,
-    required this.store,
+    required this.onDelete,
   }) : super(key: key);
 
   @override
@@ -31,7 +30,10 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
             sortColumnIndex: _sortColumnIndex,
             sortAscending: _sortAscending,
             columns: [
-              DataColumn(label: const Text('ID'), onSort: _onDataColumnSort),
+              DataColumn(
+                label: const Text('ID'),
+                onSort: _onDataColumnSort,
+              ),
               const DataColumn(
                 label: Text('Machine Operator'),
               ),
@@ -60,25 +62,6 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
                 ),
                 DataCell(
                   Text(recipe.machineOperator.target?.name ?? 'NONE'),
-                  onTap: () {
-                    showModalBottomSheet(
-                      context: context,
-                      builder: (context) {
-                        return Material(
-                          child: ListView(
-                            children: recipe.machineOperator.target!.recipes
-                                .map(
-                                  (_) => ListTile(
-                                    title: Text(
-                                        '${_.id}    ${_.machineOperator.target?.name}    ${_.name}    ${_.count}'),
-                                  ),
-                                )
-                                .toList(),
-                          ),
-                        );
-                      },
-                    );
-                  },
                 ),
                 DataCell(
                   Text(recipe.name),
@@ -93,10 +76,10 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
                   Text('${recipe.speed}'),
                 ),
                 DataCell(
-                  const Icon(Icons.delete),
-                  onTap: () {
-                    widget.store.box<Recipe>().remove(recipe.id);
-                  },
+                  DeleteButton(
+                    id: recipe.id,
+                    onPressed: widget.onDelete,
+                  ),
                 ),
               ]);
             }).toList(),
@@ -110,5 +93,18 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
       _sortAscending = ascending;
     });
     widget.onSort(columnIndex, ascending);
+  }
+}
+
+class DeleteButton extends StatelessWidget {
+  final int id;
+  final void Function(int id) onPressed;
+  const DeleteButton({Key? key, required this.id, required this.onPressed})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        onPressed: () => onPressed(id), icon: const Icon(Icons.delete));
   }
 }

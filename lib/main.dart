@@ -18,12 +18,13 @@ class _MyAppState extends State<MyApp> {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-        debugShowCheckedModeBanner: false,
-        theme: ThemeData(primarySwatch: Colors.blue),
-        home: const HomePage(),
-        routes: {
-          createOrUpdateRecipeRoute: (context) =>
-              const CreateUpdateRecipeView(),
-        });
+      debugShowCheckedModeBanner: false,
+      theme: ThemeData(primarySwatch: Colors.blue),
+      home: const HomePage(),
+      routes: {
+        createOrUpdateRecipeRoute: (context) => const CreateUpdateRecipeView(),
+        recipesRoute: (context) => const HomePage(),
+      },
+    );
   }
 }

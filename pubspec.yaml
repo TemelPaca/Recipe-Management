@@ -36,7 +36,7 @@ dependencies:
   cupertino_icons: ^1.0.2
   path_provider: ^2.0.11
   objectbox: ^1.6.2
-  objectbox_flutter_libs: any
+  objectbox_flutter_libs: ^1.6.2
 
 
 dev_dependencies:
