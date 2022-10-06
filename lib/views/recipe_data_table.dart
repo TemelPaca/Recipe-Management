@@ -5,12 +5,14 @@ class RecipeDataTable extends StatefulWidget {
   final List<Recipe> recipes;
   final void Function(int columnIndex, bool ascending) onSort;
   final void Function(int id) onDelete;
+  final void Function(Recipe recipe) onEdit;
 
   const RecipeDataTable({
     Key? key,
     required this.recipes,
     required this.onSort,
     required this.onDelete,
+    required this.onEdit,
   }) : super(key: key);
 
   @override
@@ -53,12 +55,14 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
                 label: Text('Speed'),
                 numeric: true,
               ),
+              DataColumn(label: Container()),
               DataColumn(label: Container())
             ],
-            rows: widget.recipes.map((recipe) {
+            rows: widget().recipes.map((recipe) {
               return DataRow(cells: [
                 DataCell(
                   Text(recipe.id.toString()),
+                  // onTap: () => widget().onTap(recipe),
                 ),
                 DataCell(
                   Text(recipe.machineOperator.target?.name ?? 'NONE'),
@@ -78,9 +82,13 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
                 DataCell(
                   DeleteButton(
                     id: recipe.id,
-                    onPressed: widget.onDelete,
+                    onPressed: widget().onDelete,
                   ),
                 ),
+                DataCell(EditButton(
+                  recipe: recipe,
+                  onPressed: widget().onEdit,
+                )),
               ]);
             }).toList(),
           ),
@@ -92,7 +100,7 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
       _sortColumnIndex = columnIndex;
       _sortAscending = ascending;
     });
-    widget.onSort(columnIndex, ascending);
+    widget().onSort(columnIndex, ascending);
   }
 }
 
@@ -106,5 +114,18 @@ class DeleteButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return IconButton(
         onPressed: () => onPressed(id), icon: const Icon(Icons.delete));
+  }
+}
+
+class EditButton extends StatelessWidget {
+  final Recipe recipe;
+  final void Function(Recipe recipe) onPressed;
+  const EditButton({Key? key, required this.recipe, required this.onPressed})
+      : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+        onPressed: () => onPressed(recipe), icon: const Icon(Icons.edit));
   }
 }

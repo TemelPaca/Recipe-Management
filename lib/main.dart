@@ -4,6 +4,7 @@ import 'package:recipe_management/views/create_update_recipe_view.dart';
 import 'package:recipe_management/views/home_page.dart';
 
 void main(List<String> args) {
+  WidgetsFlutterBinding.ensureInitialized();
   runApp(const MyApp());
 }
 
@@ -22,8 +23,8 @@ class _MyAppState extends State<MyApp> {
       theme: ThemeData(primarySwatch: Colors.blue),
       home: const HomePage(),
       routes: {
-        createOrUpdateRecipeRoute: (context) => const CreateUpdateRecipeView(),
         recipesRoute: (context) => const HomePage(),
+        createOrUpdateRecipeRoute: (context) => const CreateUpdateRecipeView(),
       },
     );
   }

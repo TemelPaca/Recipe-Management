@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:recipe_management/constants/routes.dart';
 import 'package:recipe_management/entities.dart';
 import 'package:recipe_management/services/objectbox/crud.dart';
+import 'package:recipe_management/utilities/dialogs/delete_dialog.dart';
 import 'package:recipe_management/views/recipe_data_table.dart';
 
 class HomePage extends StatefulWidget {
@@ -24,8 +25,7 @@ class _HomePageState extends State<HomePage> {
         objectBox = value;
 
         setState(() {
-          // _stream = objectBox.readAll();
-          _stream = objectBox.filter();
+          _stream = objectBox.readAll();
           hasBeenInitialized = true;
         });
       },
@@ -38,17 +38,17 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  void addRecipe() {
-    final recipe = Recipe(
-      name: 'Recipe#3',
-      temperature: 111.11,
-      speed: 2222.22,
-      count: 1,
-    );
+  // void addRecipe() {
+  //   final recipe = Recipe(
+  //     name: 'Recipe#3',
+  //     temperature: 111.11,
+  //     speed: 2222.22,
+  //     count: 1,
+  //   );
 
-    final machineOperator = MachineOperator(name: 'Ece Paça');
-    objectBox.createNew(recipe, machineOperator);
-  }
+  //   final machineOperator = MachineOperator(name: 'Ece Paça');
+  //   objectBox.createNew(recipe, machineOperator);
+  // }
 
   @override
   Widget build(BuildContext context) {
@@ -62,9 +62,8 @@ class _HomePageState extends State<HomePage> {
           ),
           IconButton(
             onPressed: () {
-              // Navigator.of(context).pushNamedAndRemoveUntil(
-              //     createOrUpdateRecipeRoute, (route) => false);
-              addRecipe();
+              Navigator.of(context).pushNamed(createOrUpdateRecipeRoute,
+                  arguments: [null, objectBox]);
             },
             icon: const Icon(Icons.add),
           )
@@ -85,25 +84,19 @@ class _HomePageState extends State<HomePage> {
                 return RecipeDataTable(
                   recipes: snapshot.data!,
                   onSort: (columnIndex, ascending) {
-                    // final newQueryBuilder = _store.box<Recipe>().query();
-                    // final sortField =
-                    //     columnIndex == 0 ? Recipe_.id : Recipe_.count;
-
-                    // newQueryBuilder.order(sortField,
-                    //     flags: ascending ? 0 : Order.descending);
-
-                    // setState(() {
-                    //   _stream = newQueryBuilder
-                    //       .watch(triggerImmediately: true)
-                    //       .map((query) => query.find());
-                    // });
-
                     setState(() {
                       _stream = objectBox.sortAll(columnIndex, ascending);
                     });
                   },
-                  onDelete: (id) {
-                    objectBox.delete(id);
+                  onDelete: (id) async {
+                    final recipe = objectBox.read(id);
+                    final shouldDelete =
+                        await showDeleteDialog(context, recipe);
+                    if (shouldDelete) objectBox.delete(id);
+                  },
+                  onEdit: (recipe) {
+                    Navigator.of(context).pushNamed(createOrUpdateRecipeRoute,
+                        arguments: [recipe, objectBox]);
                   },
                 );
               },

@@ -9,10 +9,6 @@ import 'package:recipe_management/objectbox.g.dart';
 class ObjectBox {
   late final Store store;
 
-  // static final ObjectBox _singleton = ObjectBox._internal();
-  // factory ObjectBox() => _singleton;
-  // ObjectBox._internal();
-
   ObjectBox._create(this.store);
 
   static Future<ObjectBox> create() async {
@@ -25,8 +21,7 @@ class ObjectBox {
     store.close();
   }
 
-  void createNew(Recipe recipe, MachineOperator machineOperator) {
-    recipe.machineOperator.target = machineOperator;
+  void createNew(Recipe recipe) {
     store.box<Recipe>().put(recipe);
   }
 
@@ -36,6 +31,14 @@ class ObjectBox {
         .query()
         .watch(triggerImmediately: true)
         .map((query) => query.find());
+  }
+
+  Recipe? read(int id) {
+    return store.box<Recipe>().get(id);
+  }
+
+  update(Recipe recipe) {
+    store.box<Recipe>().put(recipe);
   }
 
   void delete(int id) {
@@ -51,12 +54,10 @@ class ObjectBox {
         .map((query) => query.find());
   }
 
-  Stream<List<Recipe>> filter() {
-    QueryBuilder<Recipe> builder =
-        store.box<Recipe>().query(Recipe_.count.equals(3333));
+  Stream<List<Recipe>> filterByMachineOperator(String name) {
+    QueryBuilder<Recipe> builder = store.box<Recipe>().query();
 
-    builder.link(
-        Recipe_.machineOperator, MachineOperator_.name.equals('Ece Paça'));
+    builder.link(Recipe_.machineOperator, MachineOperator_.name.equals(name));
 
     return builder.watch(triggerImmediately: true).map((query) => query.find());
   }
