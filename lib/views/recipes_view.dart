@@ -2,19 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:recipe_management/constants/routes.dart';
 import 'package:recipe_management/entities.dart';
 import 'package:recipe_management/services/objectbox/crud.dart';
-import 'package:recipe_management/utilities/dialogs/delete_dialog.dart';
-import 'package:recipe_management/views/recipe_data_table.dart';
+import 'package:recipe_management/utilities/dialogs/recipe_delete_dialog.dart';
+import 'package:recipe_management/widgets/recipe_data_table.dart';
 
-class HomePage extends StatefulWidget {
-  const HomePage({Key? key}) : super(key: key);
+class RecipeListView extends StatefulWidget {
+  const RecipeListView({Key? key}) : super(key: key);
 
   @override
-  State<HomePage> createState() => _HomePageState();
+  State<RecipeListView> createState() => _RecipeListViewState();
 }
 
-class _HomePageState extends State<HomePage> {
+class _RecipeListViewState extends State<RecipeListView> {
   bool hasBeenInitialized = false;
-  late Stream<List<Recipe>> _stream;
+  late Stream<List<Recipe>> _recipeStream;
   late final ObjectBox objectBox;
 
   @override
@@ -25,7 +25,7 @@ class _HomePageState extends State<HomePage> {
         objectBox = value;
 
         setState(() {
-          _stream = objectBox.readAll();
+          _recipeStream = objectBox.readAllRecipe();
           hasBeenInitialized = true;
         });
       },
@@ -38,18 +38,6 @@ class _HomePageState extends State<HomePage> {
     super.dispose();
   }
 
-  // void addRecipe() {
-  //   final recipe = Recipe(
-  //     name: 'Recipe#3',
-  //     temperature: 111.11,
-  //     speed: 2222.22,
-  //     count: 1,
-  //   );
-
-  //   final machineOperator = MachineOperator(name: 'Ece Paça');
-  //   objectBox.createNew(recipe, machineOperator);
-  // }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -57,15 +45,20 @@ class _HomePageState extends State<HomePage> {
         title: const Text('Recipes'),
         actions: [
           IconButton(
-            onPressed: () {},
-            icon: const Icon(Icons.person_add_alt),
+            onPressed: () {
+              Navigator.of(context).pushNamed(machineOperatorsRoute,
+                  arguments: [null, objectBox, null]);
+            },
+            icon: const Icon(Icons.person),
+            tooltip: 'Machine Operators',
           ),
           IconButton(
             onPressed: () {
               Navigator.of(context).pushNamed(createOrUpdateRecipeRoute,
-                  arguments: [null, objectBox]);
+                  arguments: [null, objectBox, null]);
             },
             icon: const Icon(Icons.add),
+            tooltip: 'Add New Recipe',
           )
         ],
       ),
@@ -74,7 +67,7 @@ class _HomePageState extends State<HomePage> {
               child: CircularProgressIndicator(),
             )
           : StreamBuilder<List<Recipe>>(
-              stream: _stream,
+              stream: _recipeStream,
               builder: (context, snapshot) {
                 if (!snapshot.hasData) {
                   return const Center(
@@ -85,18 +78,25 @@ class _HomePageState extends State<HomePage> {
                   recipes: snapshot.data!,
                   onSort: (columnIndex, ascending) {
                     setState(() {
-                      _stream = objectBox.sortAll(columnIndex, ascending);
+                      _recipeStream =
+                          objectBox.sortAllRecipes(columnIndex, ascending);
                     });
                   },
                   onDelete: (id) async {
-                    final recipe = objectBox.read(id);
+                    final recipe = objectBox.readRecipe(id);
                     final shouldDelete =
-                        await showDeleteDialog(context, recipe);
-                    if (shouldDelete) objectBox.delete(id);
+                        await showRecipeDeleteDialog(context, recipe);
+                    if (shouldDelete) objectBox.deleteRecipe(id);
                   },
                   onEdit: (recipe) {
                     Navigator.of(context).pushNamed(createOrUpdateRecipeRoute,
-                        arguments: [recipe, objectBox]);
+                        arguments: [recipe, objectBox, null]);
+                  },
+                  onSaveAs: (recipe) {
+                    recipe.id = 0;
+                    recipe.name = '';
+                    Navigator.of(context).pushNamed(createOrUpdateRecipeRoute,
+                        arguments: [recipe, objectBox, true]);
                   },
                 );
               },

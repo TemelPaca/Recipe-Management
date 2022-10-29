@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:recipe_management/constants/routes.dart';
+import 'package:recipe_management/views/create_update_machine_operator_view.dart';
 import 'package:recipe_management/views/create_update_recipe_view.dart';
-import 'package:recipe_management/views/home_page.dart';
+import 'package:recipe_management/views/machine_operators_view.dart';
+import 'package:recipe_management/views/recipes_view.dart';
 
 void main(List<String> args) {
   WidgetsFlutterBinding.ensureInitialized();
@@ -21,10 +23,13 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const HomePage(),
+      home: const RecipeListView(),
       routes: {
-        recipesRoute: (context) => const HomePage(),
+        recipesRoute: (context) => const RecipeListView(),
         createOrUpdateRecipeRoute: (context) => const CreateUpdateRecipeView(),
+        machineOperatorsRoute: (context) => const MachineOperatorsListView(),
+        createOrUpdateMachineOperatorRoute: (context) =>
+            const CreateUpdateMachineOperatorView(),
       },
     );
   }

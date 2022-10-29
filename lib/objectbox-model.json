@@ -5,7 +5,7 @@
   "entities": [
     {
       "id": "1:989458524031537533",
-      "lastPropertyId": "2:3474168428227996539",
+      "lastPropertyId": "6:766116806970543145",
       "name": "MachineOperator",
       "properties": [
         {
@@ -15,8 +15,23 @@
           "flags": 1
         },
         {
-          "id": "2:3474168428227996539",
-          "name": "name",
+          "id": "3:1662534914156027800",
+          "name": "firstName",
+          "type": 9
+        },
+        {
+          "id": "4:8593581216913689685",
+          "name": "lastName",
+          "type": 9
+        },
+        {
+          "id": "5:7730083933264201951",
+          "name": "email",
+          "type": 9
+        },
+        {
+          "id": "6:766116806970543145",
+          "name": "password",
           "type": 9
         }
       ],
@@ -73,7 +88,9 @@
   "modelVersionParserMinimum": 5,
   "retiredEntityUids": [],
   "retiredIndexUids": [],
-  "retiredPropertyUids": [],
+  "retiredPropertyUids": [
+    3474168428227996539
+  ],
   "retiredRelationUids": [],
   "version": 1
 }

@@ -1,4 +1,4 @@
-List<dynamic> numericValueInputValidation<T>(
+String? numericValueInputValidation<T>(
   String? value,
   NumericDataType dataType,
   T minValue,
@@ -13,7 +13,7 @@ List<dynamic> numericValueInputValidation<T>(
   if (value != null) matchedVal = exp.stringMatch(value);
 
   if (matchedVal == null) {
-    return ['Invalid value entered !', null];
+    return 'Invalid value entered !';
   } else {
     switch (dataType) {
       case NumericDataType.integerType:
@@ -25,14 +25,14 @@ List<dynamic> numericValueInputValidation<T>(
     }
 
     if (result as num < (minValue as num)) {
-      return ['Value cannot be less than $minValue !', null];
+      return 'Value cannot be less than $minValue !';
     }
     if (result > (maxValue as num)) {
-      return ['Value cannot be greater than $maxValue !', null];
+      return 'Value cannot be greater than $maxValue !';
     }
   }
 
-  return [null, result];
+  return null;
 }
 
 enum NumericDataType {

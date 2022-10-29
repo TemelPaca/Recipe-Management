@@ -1,3 +1,4 @@
+// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:objectbox/objectbox.dart';
 
 @Entity()
@@ -31,34 +32,73 @@ class Recipe {
   }
 
   @override
-  bool operator ==(Object other) {
-    return other is Recipe &&
-        other.id == id &&
-        other.machineOperator == machineOperator &&
-        other.name == name &&
-        other.temperature == temperature &&
-        other.speed == speed &&
-        other.count == count;
-  }
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is Recipe &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          machineOperator.target == other.machineOperator.target &&
+          name == other.name &&
+          temperature == other.temperature &&
+          speed == other.speed &&
+          count == other.count;
 
   @override
-  int get hashCode => this.hashCode;
+  int get hashCode =>
+      id.hashCode +
+      machineOperator.target.hashCode +
+      name.hashCode +
+      temperature.hashCode +
+      speed.hashCode +
+      count.hashCode;
 }
 
 @Entity()
 class MachineOperator {
   int id;
-  String name;
+  String firstName;
+  String lastName;
+  String email;
+  String password;
   @Backlink()
   final recipes = ToMany<Recipe>();
 
   MachineOperator({
     this.id = 0,
-    required this.name,
+    required this.firstName,
+    required this.lastName,
+    required this.email,
+    required this.password,
   });
 
   @override
   String toString() {
-    return name;
+    return """
+    ***Machine Operator***
+    Id : $id
+    First Name : $firstName
+    Last Name : $lastName
+    email : $email
+    password : $password
+""";
   }
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is MachineOperator &&
+          runtimeType == other.runtimeType &&
+          id == other.id &&
+          firstName == other.firstName &&
+          lastName == other.lastName &&
+          email == other.email &&
+          password == other.password;
+
+  @override
+  int get hashCode =>
+      id.hashCode +
+      firstName.hashCode +
+      lastName.hashCode +
+      email.hashCode +
+      password.hashCode;
 }
