@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:recipe_management/entities.dart';
 import 'package:recipe_management/generics/get_arguments.dart';
 import 'package:recipe_management/services/objectbox/crud.dart';
+import 'package:recipe_management/utilities/decorations/text_form_field_decorations.dart';
 import 'package:recipe_management/utilities/dialogs/discard_changes_dialog.dart';
 import 'package:recipe_management/utilities/dialogs/save_machine_operator_dialog.dart';
+import 'package:recipe_management/utilities/text_validation/empty_string_input_validation.dart';
 
 class CreateUpdateMachineOperatorView extends StatefulWidget {
   const CreateUpdateMachineOperatorView({Key? key}) : super(key: key);
@@ -15,24 +17,18 @@ class CreateUpdateMachineOperatorView extends StatefulWidget {
 
 class _CreateUpdateMachineOperatorViewState
     extends State<CreateUpdateMachineOperatorView> {
-  MachineOperator _machineOperator = MachineOperator(
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-  );
-  final MachineOperator _tempMachineOperator = MachineOperator(
-    firstName: '',
-    lastName: '',
-    email: '',
-    password: '',
-  );
   late ObjectBox _objectBox;
 
   late TextEditingController _firstNameController;
   late TextEditingController _lastNameController;
   late TextEditingController _emailController;
   late TextEditingController _passwordController;
+  int? _id;
+  String? _firstName;
+  String? _lastName;
+  String? _email;
+  String? _password;
+  MachineOperator? _tempMachineOperator;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -55,62 +51,52 @@ class _CreateUpdateMachineOperatorViewState
     super.dispose();
   }
 
-  void _setupTextControllerListener() {
-    _firstNameController.removeListener(_textControllerListener);
-    _firstNameController.addListener(_textControllerListener);
-
-    _lastNameController.removeListener(_textControllerListener);
-    _lastNameController.addListener(_textControllerListener);
-
-    _emailController.removeListener(_textControllerListener);
-    _emailController.addListener(_textControllerListener);
-
-    _passwordController.removeListener(_textControllerListener);
-    _passwordController.addListener(_textControllerListener);
-  }
-
-  void _textControllerListener() {
-    _machineOperator.firstName = _firstNameController.text;
-    _machineOperator.lastName = _lastNameController.text;
-    _machineOperator.email = _emailController.text;
-    _machineOperator.password = _passwordController.text;
-  }
-
-  void _saveMachineOperator() {
-    _objectBox.createNewMachineOperator(_machineOperator);
+  void _saveMachineOperator(MachineOperator machineOperator) {
+    _objectBox.createNewMachineOperator(machineOperator);
   }
 
   void _placeRecipeData() {
-    _firstNameController.text = _machineOperator.firstName;
-    _lastNameController.text = _machineOperator.lastName;
-    _emailController.text = _machineOperator.email;
-    _passwordController.text = _machineOperator.password;
-
-    _tempMachineOperator.id = _machineOperator.id;
-    _tempMachineOperator.firstName = _machineOperator.firstName;
-    _tempMachineOperator.lastName = _machineOperator.lastName;
-    _tempMachineOperator.email = _machineOperator.email;
-    _tempMachineOperator.password = _machineOperator.password;
+    _firstNameController.text = _firstName ?? _firstNameController.text;
+    _lastNameController.text = _lastName ?? _lastNameController.text;
+    _emailController.text = _email ?? _emailController.text;
+    _passwordController.text = _password ?? _passwordController.text;
   }
 
   @override
   Widget build(BuildContext context) {
     var args = context.getArgument<Object>() as List;
     if (args[0] != null) {
-      _machineOperator = args[0] as MachineOperator;
+      _id = (args[0] as MachineOperator).id;
+      _firstName = (args[0] as MachineOperator).firstName;
+      _lastName = (args[0] as MachineOperator).lastName;
+      _email = (args[0] as MachineOperator).email;
+      _password = (args[0] as MachineOperator).password;
+      _tempMachineOperator = MachineOperator(
+        id: _id!,
+        firstName: _firstName!,
+        lastName: _lastName!,
+        email: _email!,
+        password: _password!,
+      );
     }
     _objectBox = args[1] as ObjectBox;
     _placeRecipeData();
-    _setupTextControllerListener();
 
     return WillPopScope(
       onWillPop: () async {
         if (_formKey.currentState!.validate()) {
-          if (_tempMachineOperator != _machineOperator) {
+          var machineOperator = MachineOperator(
+            id: _id ?? 0,
+            firstName: _firstNameController.text,
+            lastName: _lastNameController.text,
+            email: _emailController.text,
+            password: _passwordController.text,
+          );
+          if (machineOperator != _tempMachineOperator) {
             bool shouldSave =
-                await showSaveMachineOperatorDialog(context, _machineOperator);
+                await showSaveMachineOperatorDialog(context, machineOperator);
             if (shouldSave) {
-              _saveMachineOperator();
+              _saveMachineOperator(machineOperator);
             }
           }
           return true;
@@ -121,9 +107,7 @@ class _CreateUpdateMachineOperatorViewState
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_machineOperator.id != 0
-              ? '${_machineOperator.firstName} ${_machineOperator.lastName}'
-              : ''),
+          title: Text(_firstName ?? ''),
         ),
         body: Form(
           key: _formKey,
@@ -135,15 +119,11 @@ class _CreateUpdateMachineOperatorViewState
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
                     autofocus: args[2] ?? false,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Can not be empty !";
-                      }
-                      return null;
-                    },
+                    validator: (value) => emptyStringInputValidation(value),
                     controller: _firstNameController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a First Name",
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please enter first name',
+                      labelText: 'First Name',
                     ),
                   ),
                 ),
@@ -151,51 +131,37 @@ class _CreateUpdateMachineOperatorViewState
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
                     autofocus: args[2] ?? false,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Can not be empty !";
-                      }
-                      return null;
-                    },
+                    validator: (value) => emptyStringInputValidation(value),
                     controller: _lastNameController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a Last Name",
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please enter last name',
+                      labelText: 'Last Name',
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                    autofocus: args[2] ?? false,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Can not be empty !";
-                      }
-                      return null;
-                    },
-                    controller: _emailController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a email",
-                    ),
-                  ),
+                      autofocus: args[2] ?? false,
+                      validator: (value) => emptyStringInputValidation(value),
+                      controller: _emailController,
+                      decoration: textFormFieldDecoration(
+                        hintText: 'Please enter email address',
+                        labelText: 'Email Address',
+                      )),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                    autofocus: args[2] ?? false,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Can not be empty !";
-                      }
-                      return null;
-                    },
-                    obscureText: true,
-                    obscuringCharacter: '?',
-                    controller: _passwordController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a password",
-                    ),
-                  ),
+                      autofocus: args[2] ?? false,
+                      validator: (value) => emptyStringInputValidation(value),
+                      obscureText: true,
+                      obscuringCharacter: '?',
+                      controller: _passwordController,
+                      decoration: textFormFieldDecoration(
+                        hintText: 'Please Enter Your Password',
+                        labelText: 'Password',
+                      )),
                 ),
               ],
             ),

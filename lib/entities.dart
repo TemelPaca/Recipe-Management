@@ -1,4 +1,3 @@
-// ignore_for_file: public_member_api_docs, sort_constructors_first
 import 'package:objectbox/objectbox.dart';
 
 @Entity()
@@ -36,7 +35,6 @@ class Recipe {
       identical(this, other) ||
       other is Recipe &&
           runtimeType == other.runtimeType &&
-          id == other.id &&
           machineOperator.target == other.machineOperator.target &&
           name == other.name &&
           temperature == other.temperature &&
@@ -45,7 +43,6 @@ class Recipe {
 
   @override
   int get hashCode =>
-      id.hashCode +
       machineOperator.target.hashCode +
       name.hashCode +
       temperature.hashCode +

@@ -67,7 +67,8 @@ class _RecipeDataTableState extends State<RecipeDataTable> {
                 Text(recipe.id.toString()),
               ),
               DataCell(
-                Text(recipe.machineOperator.target?.firstName ?? ''),
+                Text(
+                    '${recipe.machineOperator.target?.firstName} ${recipe.machineOperator.target?.lastName}'),
               ),
               DataCell(
                 Text(recipe.name),

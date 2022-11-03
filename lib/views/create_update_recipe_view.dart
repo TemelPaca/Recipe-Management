@@ -2,8 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:recipe_management/entities.dart';
 import 'package:recipe_management/generics/get_arguments.dart';
 import 'package:recipe_management/services/objectbox/crud.dart';
+import 'package:recipe_management/utilities/decorations/text_form_field_decorations.dart';
 import 'package:recipe_management/utilities/dialogs/discard_changes_dialog.dart';
 import 'package:recipe_management/utilities/dialogs/save_recipe_dialog.dart';
+import 'package:recipe_management/utilities/text_validation/empty_string_input_validation.dart';
 import 'package:recipe_management/utilities/text_validation/numeric_data_input_validation.dart';
 import 'package:recipe_management/widgets/machine_operator_dropdown.dart';
 
@@ -15,27 +17,20 @@ class CreateUpdateRecipeView extends StatefulWidget {
 }
 
 class _CreateUpdateRecipeViewState extends State<CreateUpdateRecipeView> {
-  Recipe _recipe = Recipe(
-    name: '',
-    temperature: 0.0,
-    speed: 0.0,
-    count: 0,
-  );
-  final Recipe _tempRecipe = Recipe(
-    name: '',
-    temperature: 0.0,
-    speed: 0.0,
-    count: 0,
-  );
-
   late ObjectBox _objectBox;
-
   late TextEditingController _recipeNameController;
   late TextEditingController _recipeCountController;
   late TextEditingController _recipeTemperatureController;
   late TextEditingController _recipeSpeedController;
 
-  bool firstScan = false;
+  Recipe? _tempRecipe;
+  MachineOperator? _machineOperator;
+  int? _id;
+  String? _name;
+  int? _count;
+  double? _temperature;
+  double? _speed;
+  bool _firstScan = false;
 
   final _formKey = GlobalKey<FormState>();
 
@@ -45,7 +40,7 @@ class _CreateUpdateRecipeViewState extends State<CreateUpdateRecipeView> {
     _recipeCountController = TextEditingController();
     _recipeTemperatureController = TextEditingController();
     _recipeSpeedController = TextEditingController();
-    firstScan = true;
+    _firstScan = true;
     super.initState();
   }
 
@@ -58,69 +53,63 @@ class _CreateUpdateRecipeViewState extends State<CreateUpdateRecipeView> {
     super.dispose();
   }
 
-  void _setupTextControllerListener() {
-    _recipeNameController.removeListener(_textControllerListener);
-    _recipeNameController.addListener(_textControllerListener);
-
-    _recipeCountController.removeListener(_textControllerListener);
-    _recipeCountController.addListener(_textControllerListener);
-
-    _recipeTemperatureController.removeListener(_textControllerListener);
-    _recipeTemperatureController.addListener(_textControllerListener);
-
-    _recipeSpeedController.removeListener(_textControllerListener);
-    _recipeSpeedController.addListener(_textControllerListener);
-  }
-
-  void _textControllerListener() {
-    _recipe.name = _recipeNameController.text;
-    _recipe.count = int.tryParse(_recipeCountController.text)!;
-    _recipe.temperature = double.tryParse(_recipeTemperatureController.text)!;
-    _recipe.speed = double.tryParse(_recipeSpeedController.text)!;
-  }
-
-  void _saveRecipe() {
-    _objectBox.createNewRecipe(_recipe);
+  void _saveRecipe(Recipe recipe) {
+    _objectBox.createNewRecipe(recipe);
   }
 
   void _placeRecipeData() {
-    _recipeNameController.text = _recipe.name;
-    _recipeCountController.text = _recipe.count.toString();
-    _recipeTemperatureController.text = _recipe.temperature.toStringAsFixed(2);
-    _recipeSpeedController.text = _recipe.speed.toStringAsFixed(2);
-
-    _tempRecipe.id = _recipe.id;
-    _tempRecipe.machineOperator.target = _recipe.machineOperator.target;
-    _tempRecipe.name = _recipe.name;
-    _tempRecipe.count = _recipe.count;
-    _tempRecipe.temperature = _recipe.temperature;
-    _tempRecipe.speed = _recipe.speed;
+    _recipeNameController.text = _name ?? _recipeNameController.text;
+    _recipeCountController.text =
+        _count == null ? _recipeCountController.text : _count.toString();
+    _recipeTemperatureController.text =
+        _temperature?.toStringAsFixed(2) ?? _recipeTemperatureController.text;
+    _recipeSpeedController.text =
+        _speed?.toStringAsFixed(2) ?? _recipeSpeedController.text;
   }
 
   @override
   Widget build(BuildContext context) {
     var args = context.getArgument<Object>() as List;
-    if (args[0] != null) {
-      _recipe = args[0] as Recipe;
-    }
     _objectBox = args[1] as ObjectBox;
+    if (_firstScan == true) {
+      if (args[0] != null) {
+        _id = (args[0] as Recipe).id;
+        _machineOperator = (args[0] as Recipe).machineOperator.target;
+        _name = (args[0] as Recipe).name;
+        _count = (args[0] as Recipe).count;
+        _temperature = (args[0] as Recipe).temperature;
+        _speed = (args[0] as Recipe).speed;
+        _tempRecipe = Recipe(
+          id: _id!,
+          name: _name!,
+          temperature: _temperature!,
+          speed: _speed!,
+          count: _count!,
+        );
 
-    if (firstScan == true) {
+        _tempRecipe?.machineOperator.target = _machineOperator;
+      }
       _placeRecipeData();
-      firstScan = false;
+      _firstScan = false;
     }
-
-    _setupTextControllerListener();
 
     var machineOperatorStream = _objectBox.readAllMachineOperator();
 
     return WillPopScope(
       onWillPop: () async {
-        if (_formKey.currentState!.validate()) {
-          if ((_tempRecipe != _recipe)) {
-            bool shouldSave = await showSaveRecipeDialog(context, _recipe);
+        if (_formKey.currentState!.validate() && (_machineOperator != null)) {
+          var recipe = Recipe(
+            id: _id ?? 0,
+            name: _recipeNameController.text,
+            temperature: double.tryParse(_recipeTemperatureController.text)!,
+            speed: double.tryParse(_recipeSpeedController.text)!,
+            count: int.tryParse(_recipeCountController.text)!,
+          );
+          recipe.machineOperator.target = _machineOperator;
+          if (recipe != _tempRecipe) {
+            bool shouldSave = await showSaveRecipeDialog(context, recipe);
             if (shouldSave) {
-              _saveRecipe();
+              _saveRecipe(recipe);
             }
           }
           return true;
@@ -131,7 +120,7 @@ class _CreateUpdateRecipeViewState extends State<CreateUpdateRecipeView> {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: Text(_recipe.id != 0 ? _recipe.name : ''),
+          title: Text(_name ?? ''),
         ),
         body: Form(
           key: _formKey,
@@ -143,10 +132,10 @@ class _CreateUpdateRecipeViewState extends State<CreateUpdateRecipeView> {
                   padding: const EdgeInsets.all(8.0),
                   child: MachineOperatorDropDownButton(
                     machineOperatorStream: machineOperatorStream,
-                    selectedMachineOperator: _recipe.machineOperator.target,
+                    selectedMachineOperator: _machineOperator,
                     onChanged: (p0) {
                       setState(() {
-                        _recipe.machineOperator.target = p0;
+                        _machineOperator = p0;
                       });
                     },
                   ),
@@ -155,57 +144,59 @@ class _CreateUpdateRecipeViewState extends State<CreateUpdateRecipeView> {
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
                     autofocus: args[2] ?? false,
-                    validator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return "Can not be empty !";
-                      }
-                      return null;
-                    },
+                    validator: (value) => emptyStringInputValidation(value),
                     controller: _recipeNameController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a Recipe Name",
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please enter recipe name',
+                      labelText: 'Recipe Name',
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                    validator: (value) {
-                      String? validatorResult = numericValueInputValidation(
-                          value, NumericDataType.integerType, 0, 100);
-                      return validatorResult;
-                    },
+                    validator: (value) => numericValueInputValidation(
+                      value,
+                      NumericDataType.integerType,
+                      0,
+                      100,
+                    ),
                     controller: _recipeCountController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a Count Value",
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please enter count value',
+                      labelText: 'Count Value',
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                    validator: (value) {
-                      String? validatorResult = numericValueInputValidation(
-                          value, NumericDataType.doubleType, 0.0, 300.0);
-                      return validatorResult;
-                    },
+                    validator: (value) => numericValueInputValidation(
+                      value,
+                      NumericDataType.doubleType,
+                      0.0,
+                      300.0,
+                    ),
                     controller: _recipeTemperatureController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a Temperature Value",
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please enter temperature value',
+                      labelText: 'Temperature Value',
                     ),
                   ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                    validator: (value) {
-                      String? validatorResult = numericValueInputValidation(
-                          value, NumericDataType.doubleType, 100.0, 3000.0);
-                      return validatorResult;
-                    },
+                    validator: (value) => numericValueInputValidation(
+                      value,
+                      NumericDataType.doubleType,
+                      100.0,
+                      3000.0,
+                    ),
                     controller: _recipeSpeedController,
-                    decoration: const InputDecoration(
-                      hintText: "Please enter a Speed Value",
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please enter speed value',
+                      labelText: 'Speed Value',
                     ),
                   ),
                 ),
