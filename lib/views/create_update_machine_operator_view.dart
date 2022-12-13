@@ -5,6 +5,7 @@ import 'package:recipe_management/services/objectbox/crud.dart';
 import 'package:recipe_management/utilities/decorations/text_form_field_decorations.dart';
 import 'package:recipe_management/utilities/dialogs/discard_changes_dialog.dart';
 import 'package:recipe_management/utilities/dialogs/save_machine_operator_dialog.dart';
+import 'package:recipe_management/utilities/text_validation/email_input_validation.dart';
 import 'package:recipe_management/utilities/text_validation/empty_string_input_validation.dart';
 
 class CreateUpdateMachineOperatorView extends StatefulWidget {
@@ -142,26 +143,28 @@ class _CreateUpdateMachineOperatorViewState
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                      autofocus: args[2] ?? false,
-                      validator: (value) => emptyStringInputValidation(value),
-                      controller: _emailController,
-                      decoration: textFormFieldDecoration(
-                        hintText: 'Please enter email address',
-                        labelText: 'Email Address',
-                      )),
+                    autofocus: args[2] ?? false,
+                    validator: (value) => emailInputValidation(value),
+                    controller: _emailController,
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please enter email address',
+                      labelText: 'Email Address',
+                    ),
+                  ),
                 ),
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: TextFormField(
-                      autofocus: args[2] ?? false,
-                      validator: (value) => emptyStringInputValidation(value),
-                      obscureText: true,
-                      obscuringCharacter: '?',
-                      controller: _passwordController,
-                      decoration: textFormFieldDecoration(
-                        hintText: 'Please Enter Your Password',
-                        labelText: 'Password',
-                      )),
+                    autofocus: args[2] ?? false,
+                    validator: (value) => emptyStringInputValidation(value),
+                    obscureText: true,
+                    obscuringCharacter: '?',
+                    controller: _passwordController,
+                    decoration: textFormFieldDecoration(
+                      hintText: 'Please Enter Your Password',
+                      labelText: 'Password',
+                    ),
+                  ),
                 ),
               ],
             ),

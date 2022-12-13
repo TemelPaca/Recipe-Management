@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:recipe_management/constants/routes.dart';
 import 'package:recipe_management/views/create_update_machine_operator_view.dart';
 import 'package:recipe_management/views/create_update_recipe_view.dart';
+import 'package:recipe_management/views/home_view.dart';
 import 'package:recipe_management/views/machine_operators_view.dart';
 import 'package:recipe_management/views/recipes_view.dart';
 
@@ -23,7 +24,7 @@ class _MyAppState extends State<MyApp> {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: ThemeData(primarySwatch: Colors.blue),
-      home: const RecipeListView(),
+      home: const HomeView(),
       routes: {
         recipesRoute: (context) => const RecipeListView(),
         createOrUpdateRecipeRoute: (context) => const CreateUpdateRecipeView(),
